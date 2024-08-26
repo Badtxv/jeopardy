@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=landscape">
     <title>Jeopardy Game</title>
     <style>
         body {
@@ -15,25 +15,25 @@
         }
         h1 {
             margin: 20px 0;
-            font-size: 2.5em;
+            font-size: 3em;
             color: #f39c12;
             text-shadow: 2px 2px #c0392b;
         }
         h2 {
             margin: 10px 0;
-            font-size: 1.8em;
+            font-size: 2.2em;
             color: #ecf0f1;
         }
         table {
             margin: 20px auto;
             border-collapse: collapse;
-            width: 100%;
+            width: 95%;
             max-width: 1000px;
         }
         th, td {
             border: 3px solid #ecf0f1;
-            padding: 10px;
-            font-size: 1em;
+            padding: 15px;
+            font-size: 1.5em;
             text-transform: uppercase;
             color: #ecf0f1;
         }
@@ -56,19 +56,19 @@
             cursor: not-allowed;
         }
         #scoreboard {
-            margin-top: 10px;
-            font-size: 1.5em;
+            margin-top: 20px;
+            font-size: 2.2em;
             color: #f39c12;
         }
         p {
             margin: 0;
         }
         .container, .question-box, .result-popup {
-            padding: 15px;
+            padding: 20px;
             background-color: #34495e;
             box-shadow: 0px 0px 10px 3px rgba(0,0,0,0.3);
             border-radius: 10px;
-            width: 90%;
+            width: 95%;
             max-width: 1000px;
             margin: auto;
             display: none;
@@ -80,16 +80,16 @@
             color: #ecf0f1;
         }
         .question-box p {
-            font-size: 1.2em;
+            font-size: 1.8em;
             margin-bottom: 15px;
         }
         .question-box button {
             display: block;
             width: 100%;
             max-width: 400px;
-            margin: 5px auto;
-            padding: 10px;
-            font-size: 1em;
+            margin: 10px auto;
+            padding: 15px;
+            font-size: 1.5em;
             background-color: #2980b9;
             color: #ecf0f1;
             border: none;
@@ -101,7 +101,7 @@
         }
         .result-popup {
             text-align: center;
-            font-size: 1.5em;
+            font-size: 1.8em;
             padding: 20px;
             margin-top: 15px;
         }
@@ -123,16 +123,16 @@
             max-width: 500px;
         }
         .topic-selector select {
-            padding: 10px;
-            font-size: 1.2em;
+            padding: 15px;
+            font-size: 1.5em;
             border-radius: 5px;
             border: none;
             cursor: pointer;
             width: 100%;
         }
         #start-game {
-            padding: 10px 20px;
-            font-size: 1.2em;
+            padding: 15px 20px;
+            font-size: 1.5em;
             background-color: #27ae60;
             color: #ecf0f1;
             border: none;
@@ -145,23 +145,23 @@
         }
         @media (max-width: 768px) {
             h1 {
-                font-size: 2em;
+                font-size: 2.5em;
             }
             h2 {
-                font-size: 1.5em;
+                font-size: 1.8em;
             }
             th, td {
-                padding: 10px;
-                font-size: 0.9em;
+                padding: 12px;
+                font-size: 1.2em;
             }
             .question-box p {
-                font-size: 1em;
+                font-size: 1.4em;
             }
             .question-box button {
-                font-size: 0.9em;
+                font-size: 1.2em;
             }
             .result-popup {
-                font-size: 1.2em;
+                font-size: 1.5em;
             }
         }
     </style>
