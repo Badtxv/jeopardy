@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeopardy Game</title>
+    <style>
+        body {
+            font-family: 'Trebuchet MS', sans-serif;
+            background-color: #1e272e;
+            color: #ecf0f1;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            margin: 20px 0;
+            font-size: 2.5em;
+            color: #f39c12;
+            text-shadow: 2px 2px #c0392b;
+        }
+        h2 {
+            margin: 10px 0;
+            font-size: 1.8em;
+            color: #ecf0f1;
+        }
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 1000px;
+        }
+        th, td {
+            border: 3px solid #ecf0f1;
+            padding: 10px;
+            font-size: 1em;
+            text-transform: uppercase;
+            color: #ecf0f1;
+        }
+        th {
+            background-color: #2980b9;
+            text-shadow: 1px 1px #2c3e50;
+        }
+        td {
+            background-color: #3498db;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        td:hover {
+            background-color: #2ecc71;
+            color: #2c3e50;
+        }
+        td.inactive {
+            background-color: #7f8c8d;
+            color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        #scoreboard {
+            margin-top: 10px;
+            font-size: 1.5em;
+            color: #f39c12;
+        }
+        p {
+            margin: 0;
+        }
+        .container, .question-box, .result-popup {
+            padding: 15px;
+            background-color: #34495e;
+            box-shadow: 0px 0px 10px 3px rgba(0,0,0,0.3);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 1000px;
+            margin: auto;
+            display: none;
+        }
+        .question-box {
+            margin-top: 20px;
+            background-color: #2c3e50;
+            box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+            color: #ecf0f1;
+        }
+        .question-box p {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .question-box button {
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            margin: 5px auto;
+            padding: 10px;
+            font-size: 1em;
+            background-color: #2980b9;
+            color: #ecf0f1;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .question-box button:hover {
+            background-color: #3498db;
+        }
+        .result-popup {
+            text-align: center;
+            font-size: 1.5em;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        .result-popup.correct {
+            background-color: #2ecc71;
+            color: #2c3e50;
+        }
+        .result-popup.incorrect {
+            background-color: #e74c3c;
+            color: #ecf0f1;
+        }
+        .topic-selector {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #34495e;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 500px;
+        }
+        .topic-selector select {
+            padding: 10px;
+            font-size: 1.2em;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+        #start-game {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            background-color: #27ae60;
+            color: #ecf0f1;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        #start-game:hover {
+            background-color: #2ecc71;
+        }
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            th, td {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            .question-box p {
+                font-size: 1em;
+            }
+            .question-box button {
+                font-size: 0.9em;
+            }
+            .result-popup {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+    <script>
+        let score = 0;
+        let currentQuestion = null;
+        let currentElement = null;
+
+        const topics = {
+            "American Revolution": {
+                "Key Battles": [
+                    {
+                        question: "This 1775 battle, although a British victory, demonstrated that the colonial forces could stand up to the British army.",
+                        options: ["Battle of Bunker Hill", "Battle of Yorktown", "Battle of Trenton", "Battle of Saratoga"],
+                        answer: "Battle of Bunker Hill"
+                    },
+                    {
+                        question: "The turning point of the American Revolution, this 1777 battle convinced France to support the American cause.",
+                        options: ["Battle of Trenton", "Battle of Saratoga", "Battle of Yorktown", "Battle of Lexington"],
+                        answer: "Battle of Saratoga"
+                    },
+                    // More questions here...
+                ],
+                // Additional categories here...
+            },
+            "Refrigeration": {
+                "Refrigeration Cycle": [
+                    {
+                        question: "What is the primary purpose of the evaporator in a refrigeration cycle?",
+                        options: ["To absorb heat", "To compress refrigerant", "To release heat", "To circulate air"],
+                        answer: "To absorb heat"
+                    },
+                    {
+                        question: "In a refrigeration system, what is the state of refrigerant when it leaves the compressor?",
+                        options: ["Low-pressure gas", "High-pressure liquid", "High-pressure gas", "Low-pressure liquid"],
+                        answer: "High-pressure gas"
+                    },
+                    {
+                        question: "What is the purpose of subcooling in the refrigeration cycle?",
+                        options: ["To ensure the refrigerant is completely liquid before entering the expansion device", "To increase the temperature of the refrigerant", "To reduce the refrigerant pressure", "To cool the evaporator"],
+                        answer: "To ensure the refrigerant is completely liquid before entering the expansion device"
+                    },
+                    {
+                        question: "What is the term used for the temperature difference between the refrigerant's saturation temperature and the temperature of the refrigerant as it leaves the evaporator?",
+                        options: ["Superheat", "Subcooling", "Latent Heat", "Saturation"],
+                        answer: "Superheat"
+                    },
+                    {
+                        question: "Which of the following describes the latent heat process in the refrigeration cycle?",
+                        options: ["The process where the refrigerant absorbs heat and changes phase", "The process where refrigerant cools but remains in the same phase", "The point where the refrigerant pressure is reduced", "The process of superheating the refrigerant gas"],
+                        answer: "The process where the refrigerant absorbs heat and changes phase"
+                    }
+                ],
+                "Evaporators": [
+                    {
+                        question: "What is the typical temperature range for a medium-temperature evaporator?",
+                        options: ["35°F to 37°F", "30°F to 32°F", "40°F to 45°F", "25°F to 27°F"],
+                        answer: "35°F to 37°F"
+                    },
+                    {
+                        question: "What is the main role of the evaporator in a refrigeration system?",
+                        options: ["Release heat from refrigerant", "Absorb heat from the environment", "Increase the pressure of the refrigerant", "Maintain the refrigerant in a liquid state"],
+                        answer: "Absorb heat from the environment"
+                    },
+                    {
+                        question: "What happens when an evaporator coil is covered in frost?",
+                        options: ["Heat transfer decreases, causing higher box temperatures", "Heat transfer increases, making the system more efficient", "The refrigerant flow increases", "The system shuts down"],
+                        answer: "Heat transfer decreases, causing higher box temperatures"
+                    },
+                    {
+                        question: "What is the effect of a dirty evaporator coil on system performance?",
+                        options: ["Reduced airflow and increased coil temperature", "Increased airflow and reduced coil temperature", "Decreased compressor load", "No significant effect"],
+                        answer: "Reduced airflow and increased coil temperature"
+                    },
+                    {
+                        question: "How often should evaporator coils be cleaned in a commercial refrigeration system?",
+                        options: ["At least once every six months", "Once every two years", "Only when the system shows signs of inefficiency", "Never, they are self-cleaning"],
+                        answer: "At least once every six months"
+                    }
+                ],
+                "Condensers": [
+                    {
+                        question: "What happens to refrigerant in the condenser?",
+                        options: ["It evaporates", "It absorbs heat", "It condenses and releases heat", "It compresses"],
+                        answer: "It condenses and releases heat"
+                    },
+                    {
+                        question: "Why is it important to keep the condenser coil clean?",
+                        options: ["To ensure efficient heat transfer", "To prevent refrigerant from freezing", "To avoid compressor overheating", "To maintain refrigerant pressure"],
+                        answer: "To ensure efficient heat transfer"
+                    },
+                    {
+                        question: "What is the most common material used for condenser tubes in commercial refrigeration systems?",
+                        options: ["Copper", "Aluminum", "Stainless steel", "Brass"],
+                        answer: "Copper"
+                    },
+                    {
+                        question: "How does a dirty condenser affect the refrigeration system?",
+                        options: ["Increases head pressure, leading to higher energy consumption", "Decreases head pressure, improving system efficiency", "Has no effect", "Increases subcooling"],
+                        answer: "Increases head pressure, leading to higher energy consumption"
+                    },
+                    {
+                        question: "What could cause a condenser to have poor heat rejection capabilities?",
+                        options: ["Dirty coils or insufficient airflow", "Overcharged refrigerant", "Low ambient temperature", "High refrigerant flow rate"],
+                        answer: "Dirty coils or insufficient airflow"
+                    }
+                ],
+                "Compressors": [
+                    {
+                        question: "What is the main function of the compressor in a refrigeration system?",
+                        options: ["To cool down the refrigerant", "To circulate the refrigerant", "To compress the refrigerant gas and raise its pressure", "To evaporate the refrigerant"],
+                        answer: "To compress the refrigerant gas and raise its pressure"
+                    },
+                    {
+                        question: "What can cause a compressor to overheat in a low-temperature application?",
+                        options: ["High compression ratios and low mass flow rates of refrigerant", "Low compression ratios and high mass flow rates of refrigerant", "High suction pressure", "Insufficient refrigerant charge"],
+                        answer: "High compression ratios and low mass flow rates of refrigerant"
+                    },
+                    {
+                        question: "What is the primary advantage of scroll compressors over reciprocating compressors in commercial refrigeration?",
+                        options: ["Nearly 100% volumetric efficiency", "Lower initial cost", "Simpler design", "Higher compression ratios"],
+                        answer: "Nearly 100% volumetric efficiency"
+                    },
+                    {
+                        question: "What is a common symptom of a failing compressor in a refrigeration system?",
+                        options: ["Reduced cooling capacity and abnormal noise", "Increased cooling capacity and quiet operation", "Increased refrigerant flow", "Normal operation with increased efficiency"],
+                        answer: "Reduced cooling capacity and abnormal noise"
+                    },
+                    {
+                        question: "What safety device is typically used to protect a compressor from high discharge pressure?",
+                        options: ["High-pressure cut-out switch", "Thermal overload protector", "Low-pressure cut-out switch", "Flow switch"],
+                        answer: "High-pressure cut-out switch"
+                    }
+                ],
+                "Troubleshooting": [
+                    {
+                        question: "What might low refrigerant pressure indicate in a refrigeration system?",
+                        options: ["Low refrigerant charge or a restriction in the evaporator", "Overcharged refrigerant", "High ambient temperature", "Dirty condenser"],
+                        answer: "Low refrigerant charge or a restriction in the evaporator"
+                    },
+                    {
+                        question: "How can you diagnose a refrigerant overcharge?",
+                        options: ["High discharge pressure and low superheat", "Low discharge pressure and high superheat", "High suction pressure and high superheat", "Low suction pressure and low superheat"],
+                        answer: "High discharge pressure and low superheat"
+                    },
+                    {
+                        question: "What could be the cause of high suction pressure in a refrigeration system?",
+                        options: ["Overfeeding of the evaporator", "Undersized compressor", "Low refrigerant charge", "Dirty condenser"],
+                        answer: "Overfeeding of the evaporator"
+                    },
+                    {
+                        question: "What does high head pressure typically indicate?",
+                        options: ["A dirty condenser, overcharged system, or non-condensable gases", "Undercharged system, or low ambient temperature", "High airflow across evaporator", "Blocked expansion valve"],
+                        answer: "A dirty condenser, overcharged system, or non-condensable gases"
+                    },
+                    {
+                        question: "What could cause a compressor to trip on thermal overload?",
+                        options: ["High suction pressure or low refrigerant charge", "High discharge pressure or dirty condenser", "Low ambient temperature or low airflow", "Blocked expansion valve or high refrigerant charge"],
+                        answer: "High discharge pressure or dirty condenser"
+                    }
+                ],
+                "Supermarket Refrigeration": [
+                    {
+                        question: "What is the purpose of an air curtain in supermarket refrigeration cases?",
+                        options: ["To maintain cold air inside the case", "To circulate warm air", "To dehumidify the air", "To prevent condensation on the glass"],
+                        answer: "To maintain cold air inside the case"
+                    },
+                    {
+                        question: "What can be the consequence of improper maintenance of refrigeration systems in supermarkets?",
+                        options: ["Higher energy costs", "Equipment failure", "Loss of refrigerated products", "All of the above"],
+                        answer: "All of the above"
+                    },
+                    {
+                        question: "What is the purpose of a floating head pressure system in supermarket refrigeration?",
+                        options: ["To allow the system's head pressure to drop as ambient temperature drops", "To maintain a constant head pressure regardless of ambient temperature", "To increase compressor efficiency", "To prevent refrigerant migration"],
+                        answer: "To allow the system's head pressure to drop as ambient temperature drops"
+                    },
+                    {
+                        question: "What is the benefit of using electronic expansion valves in supermarket refrigeration?",
+                        options: ["Improved control over refrigerant flow and better energy efficiency", "Lower installation cost", "Simpler design compared to thermal expansion valves", "Higher head pressure"],
+                        answer: "Improved control over refrigerant flow and better energy efficiency"
+                    },
+                    {
+                        question: "How does improper maintenance of supermarket refrigeration systems affect energy consumption?",
+                        options: ["Increases energy consumption and operating costs", "Decreases energy consumption", "Has no impact on energy consumption", "Reduces equipment lifespan but not energy consumption"],
+                        answer: "Increases energy consumption and operating costs"
+                    }
+                ]
+            }
+        };
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.style.display = 'none');
+            document.getElementById(pageId).style.display = 'block';
+        }
+
+        function startGame() {
+            const selectedTopic = document.getElementById('topic-select').value;
+            loadGame(selectedTopic);
+            showPage('game-page');
+            document.getElementById('selected-category').textContent = selectedTopic;
+        }
+
+        function loadGame(topic) {
+            const selectedTopic = topics[topic];
+            const categories = Object.keys(selectedTopic).sort(() => 0.5 - Math.random()).slice(0, 6); // Randomly select 6 categories
+
+            const tableHeaders = document.querySelector('#game-table thead tr');
+            const tableBody = document.querySelector('#game-table tbody');
+
+            tableHeaders.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            categories.forEach(category => {
+                const th = document.createElement('th');
+                th.textContent = category;
+                tableHeaders.appendChild(th);
+
+                const questions = selectedTopic[category].sort(() => 0.5 - Math.random()).slice(0, 5); // Randomly select 5 questions per category
+
+                for (let i = 0; i < questions.length; i++) {
+                    let row = tableBody.children[i];
+                    if (!row) {
+                        row = document.createElement('tr');
+                        tableBody.appendChild(row);
+                    }
+                    const td = document.createElement('td');
+                    td.textContent = `$${(i + 1) * 200}`;
+                    td.setAttribute('onclick', `showQuestion('${topic}', '${category}', ${i}, this)`);
+                    row.appendChild(td);
+                }
+            });
+        }
+
+        function showQuestion(topic, category, index, element) {
+            const questionData = topics[topic][category][index];
+            currentQuestion = questionData;
+            currentElement = element;
+
+            document.getElementById('question-text').textContent = questionData.question;
+
+            // Display multiple choice options
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            questionData.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.onclick = () => submitAnswer(option);
+                optionsContainer.appendChild(button);
+            });
+
+            document.querySelector('.question-box').style.display = 'block';
+        }
+
+        function submitAnswer(selectedOption) {
+            const resultPopup = document.querySelector('.result-popup');
+            if (selectedOption === currentQuestion.answer) {
+                resultPopup.className = 'result-popup correct';
+                resultPopup.textContent = `Correct! The answer is: ${currentQuestion.answer}`;
+                score += parseInt(currentElement.textContent.replace('$', ''));
+            } else {
+                resultPopup.className = 'result-popup incorrect';
+                resultPopup.textContent = `Incorrect. The correct answer is: ${currentQuestion.answer}`;
+                score -= parseInt(currentElement.textContent.replace('$', ''));
+            }
+
+            document.getElementById("score").textContent = score;
+            document.querySelector('.question-box').style.display = 'none';
+            resultPopup.style.display = 'block';
+
+            currentElement.classList.add('inactive');
+            currentElement.textContent = ''; 
+        }
+
+        window.onload = function() {
+            showPage('topic-page');
+        };
+    </script>
+</head>
+<body>
+    <!-- Topic Selection Page -->
+    <div id="topic-page" class="page">
+        <div class="topic-selector">
+            <h1>Select a Topic</h1>
+            <select id="topic-select">
+                <option value="American Revolution">American Revolution</option>
+                <option value="Refrigeration">Refrigeration</option>
+            </select>
+            <br>
+            <button id="start-game" onclick="startGame()">Start Game</button>
+        </div>
+    </div>
+
+    <!-- Game Page -->
+    <div id="game-page" class="page">
+        <h1>Jeopardy Game</h1>
+        <h2 id="selected-category"></h2>
+        <table id="game-table">
+            <thead>
+                <tr></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div id="scoreboard">
+            <p>Score: <span id="score">0</span></p>
+        </div>
+
+        <!-- Question and Answer Box -->
+        <div class="question-box">
+            <p id="question-text"></p>
+            <div id="options-container"></div>
+        </div>
+
+        <!-- Result Popup -->
+        <div class="result-popup"></div>
+    </div>
+</body>
+</html>
